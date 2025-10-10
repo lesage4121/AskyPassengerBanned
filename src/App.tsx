@@ -1,0 +1,83 @@
+import { useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+
+import Navbar from "./components/Navbar";
+import Sidebar from "./components/Sidebar";
+import Dashboard from "./pages/Dashboard";
+import Passengers from "./pages/Passengers";
+import Users from "./pages/Users";
+import Profile from "./pages/Profile";
+import Login from "./pages/Login";
+import ErrorPage from "./pages/Errorpage";
+import { LanguageProvider } from './contexts/LanguageContext';
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { DataProvider } from "./contexts/DataContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import { useNotifications } from "./hooks/useNotifications";
+import { ApiError } from "./services/Api";
+
+// -------- Composant principal --------
+function AppContent() {
+  const { user } = useAuth();
+  useNotifications();
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // **Nouveau state pour gérer l'erreur globale**
+  const [globalError, setGlobalError] = useState<ApiError | null>(null);
+
+  // Exemple : intercepter les erreurs API et mettre à jour globalError
+  window.handleGlobalError = (error: any) => {
+    setGlobalError(error);
+  };
+
+  // Si une erreur globale est présente → afficher uniquement la page d'erreur
+  if (globalError) {
+    return <ErrorPage error={globalError} />;
+  }
+
+  // Si aucun utilisateur n'est connecté → afficher Login
+  if (!user) {
+    return <Login />;
+  }
+
+  // Sinon, afficher l'application normale
+  return (
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Navbar onMenuClick={() => setSidebarOpen(true)} />
+        <main className="flex-1 overflow-x-hidden overflow-y-auto">
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/passengers" element={<Passengers />} />
+            <Route path="/users" element={<Users />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+// -------- Composant racine --------
+function App() {
+  return (
+    <ThemeProvider>
+      <LanguageProvider>
+      <AuthProvider>
+        <DataProvider>
+          <Router>
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+              <AppContent />
+            </div>
+          </Router>
+        </DataProvider>
+      </AuthProvider>
+      </LanguageProvider>
+    </ThemeProvider>
+  );
+}
+
+export default App;
