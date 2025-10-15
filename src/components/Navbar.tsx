@@ -3,6 +3,7 @@ import { Menu,  Search, LogOut, Moon, Sun,  Languages } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { motion } from 'framer-motion';
 
 interface NavbarProps {
   onMenuClick: () => void;
@@ -14,6 +15,7 @@ function Navbar({ onMenuClick }: NavbarProps) {
   const { language, setLanguage, t } = useLanguage();
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const languageMenuRef = useRef<HTMLDivElement>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Fermer le menu quand on clique ailleurs
   useEffect(() => {
@@ -29,9 +31,16 @@ function Navbar({ onMenuClick }: NavbarProps) {
     };
   }, []);
 
+  function handleSearch() {
+  if (!searchTerm.trim()) return;
+
+  // Exemple 1 : rediriger vers une page de recherche
+  window.location.href = `/${encodeURIComponent(searchTerm)}`;
+}
+
   const languages = [
-    { code: 'fr', name: 'Français', flag: '🇫🇷' },
-    { code: 'en', name: 'English', flag: '🇬🇧' }
+    { code: 'fr', name: 'Français', flag: 'FR' },
+    { code: 'en', name: 'English', flag: 'EN' }
   ];
 
   const currentLanguage = languages.find(lang => lang.code === language);
@@ -43,16 +52,11 @@ function Navbar({ onMenuClick }: NavbarProps) {
           <div className="flex items-center">
             <button
               onClick={onMenuClick}
-              className="lg:hidden" >
+              className="lg:hidden text-gray-800 dark:text-white" >
               <Menu className="h-6 w-6" />
             </button>
             <div className="flex items-center ml-4 lg:ml-0">
               <div className="flex items-center">
-               {/* <img 
-                  src="/image.png" 
-                  alt="ASKY Airlines" 
-                  className="h-8 w-auto"
-                /> */}
                 <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white transition-colors">PassBanned</span>
               </div>
             </div>
@@ -61,11 +65,17 @@ function Navbar({ onMenuClick }: NavbarProps) {
           <div className="flex items-center space-x-4">
             <div className="hidden md:flex items-center space-x-4">
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-5 w-5 text-gray-400" />
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center cursor-pointer">
+                  <Search className="h-5 w-5 text-gray-400 hover:text-asky-orange-500" />
                 </div>
                 <input
                   type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                             handleSearch();
+                            }}}
                   placeholder={t('nav.search')}
                   className="w-64 pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm placeholder-gray-500 dark:placeholder-gray-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-asky-orange-500 focus:border-asky-orange-500 transition-colors"
                 />
@@ -84,7 +94,13 @@ function Navbar({ onMenuClick }: NavbarProps) {
 
               {/* Menu déroulant */}
               {showLanguageMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50">
+                 <motion.div
+                 initial={{ opacity: 0, y: -10 }}     
+                 animate={{ opacity: 1, y: 0 }}
+                 exit={{ opacity: 0, y: -10 }}        
+                 transition={{ duration: 0.5, ease: "easeInOut" }}
+                 className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50 origin-top"
+               >
                   <div className="py-1">
                     {languages.map((lang) => (
                       <button
@@ -107,7 +123,7 @@ function Navbar({ onMenuClick }: NavbarProps) {
                       </button>
                     ))}
                   </div>
-                </div>
+                </motion.div>
               )}
             </div>
 

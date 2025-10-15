@@ -327,22 +327,6 @@ function Profile() {
               </div>
             </div>
           </div>
-
-            {/*<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('profile.security')}</h3>
-           <div className="space-y-3">
-              <button className="w-full text-left px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                <p className="text-sm font-medium text-gray-900">{t('profile.loginHistory')}</p>
-                <p className="text-xs text-gray-600">Voir l'activité de votre compte</p>
-              </button>
-              <button className="w-full text-left px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                <p className="text-sm font-medium text-gray-900">Sessions actives</p>
-                <p className="text-xs text-gray-600">Gérer vos sessions ouvertes</p>
-              </button>
-            </div>
-            
-          </div>
-          */}
         </div>
       </div>
     </div>

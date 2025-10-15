@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { X, Save, Eye, EyeOff } from 'lucide-react';
 import { SystemUser } from '../contexts/DataContext';
 import { userService } from '../services/Api';
-import { useNotifications } from '../hooks/useNotifications';
 import AvatarUpload from './avatarUpload';
+import { useLanguage } from '../contexts/LanguageContext';
+import { motion } from 'framer-motion';
+
 
 interface UserModalProps {
   isOpen: boolean;
@@ -14,7 +16,6 @@ interface UserModalProps {
 }
 
 function UserModal({ isOpen, onClose, onSave, user, mode }: UserModalProps) {
-  const { showSuccess, showError } = useNotifications();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -28,6 +29,7 @@ function UserModal({ isOpen, onClose, onSave, user, mode }: UserModalProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const{t} = useLanguage()
 
   useEffect(() => {
     if (user && (mode === 'edit' || mode === 'view')) {
@@ -120,7 +122,6 @@ function UserModal({ isOpen, onClose, onSave, user, mode }: UserModalProps) {
       } else {
         // Mode création - upload avec nom unique
         response = await userService.uploadAvatarForNewUser(file);
-        showSuccess('Avatar uploadé', 'Photo de profil uploadée avec succès');
         alert("opération effectuée avec succès")
         
       }
@@ -129,7 +130,6 @@ function UserModal({ isOpen, onClose, onSave, user, mode }: UserModalProps) {
       
     } catch (error) {
       console.error('Erreur upload avatar:', error);
-      showError('Erreur', 'Impossible d\'uploader l\'avatar. Vérifiez votre configuration Supabase.');
     }
   };
 
@@ -140,7 +140,11 @@ function UserModal({ isOpen, onClose, onSave, user, mode }: UserModalProps) {
                 mode === 'edit' ? 'Modifier l\'utilisateur' : 'Détails de l\'utilisateur';
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <motion.div 
+    initial={{ opacity: 0, y: -30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
@@ -371,7 +375,7 @@ function UserModal({ isOpen, onClose, onSave, user, mode }: UserModalProps) {
           )}
         </form>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

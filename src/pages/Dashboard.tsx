@@ -51,7 +51,7 @@ const [initialLoading, setInitialLoading] = useState(true);
     .slice(0, 5);
 
 
- if (loading) {
+ if (loading ) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
         {/* Cercle de chargement */}
@@ -59,7 +59,7 @@ const [initialLoading, setInitialLoading] = useState(true);
       </div>
     );
   }
-  if (error) {
+  if (error && !loading) {
   return (
     <div className="flex items-center justify-center min-h-screen bg-red-50 dark:bg-red-900">
       <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">

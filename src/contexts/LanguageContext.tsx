@@ -92,6 +92,26 @@ const translations = {
     'passengers.detailsban':'Détails du ban',
     'passengers.confirmsup': 'Confirmer la suppression',
     'passengers.supcomfirmé':'Êtes-vous sûr de vouloir supprimer ce passager banni ? Cette action est irréversible.',
+    'passengers.next':'Page suivante',
+    'passengers.previous':'Page précédente',
+    'passengers.requestname': 'Le nom est requis',
+    'passengers.requestprenom':'Le prénom est requis',
+    'passengers.rquestpassport':'Le numéro de passeport est requis',
+    'passengers.requestnationality':'La nationalité est requise',
+    'passengers.requestdatebeth':'La date de naissance est requise',
+    'passengers.requestbanraison':'La raison du ban est requise',
+    'passengers.requestdateban':'La date du ban est requise',
+    'passengers.requestendban':'La date de fin est requise pour un ban temporaire',
+    'passengers.requestemailformat':'Format d\'email invalide',
+    'passengers.titleaddpassenger': 'Ajouter un passager banni',
+    'passengers.titlemodifierpassenger':'Ajouter un passager banni',
+    'passengers.titlepassengerdetails':'Détails du passager',
+    'passengers.passnumder':'Numéro de passeport',
+    'passengers.datebith':'Date de naissance',
+    'passengers.infoban': 'Informations du ban',
+    'passengers.banraison': 'Raison du ban',
+    'passengers.datefinban':'Date de fin du ban',
+    'passengers.additionalenote':'Notes additionnelles',
 
     // Users
     'users.title': 'Gestion des utilisateurs',
@@ -110,6 +130,8 @@ const translations = {
     'users.accessDenied': 'Accès refusé',
     'users.accessDeniedDesc': 'Vous devez être administrateur pour accéder à cette page.',
     'users.nouser':'Aucun utilisateur trouvé',
+
+  
     
     // Profile
     'profile.title': 'Mon Profil',
@@ -166,7 +188,8 @@ const translations = {
     'common.nationality':'NATIONALITE',
     'common.durée':'Durée',
     'common.modifiéle':'Modifié le',
-    'common.raison':'Raison et notes'
+    'common.raison':'Raison et notes',
+    'common.prenom':'Prénom',
   },
   en: {
     // Navigation
@@ -232,7 +255,7 @@ const translations = {
     'passengers.nationality': 'Nationality',
     'passengers.all': 'All',
     'passenger.passenger':'Passenger',
-    'passengers.dateban':'Date du ban',
+    'passengers.dateban':'Date of ban',
     'passenger.pfound':'found',
     'passengers.temporary': 'Temporary',
     'passengers.permanent': 'Permanent',
@@ -248,7 +271,27 @@ const translations = {
     'passengers.detailsban':'Ban details',
     'passengers.confirmsup': 'Confirm deletion',
     'passengers.supcomfirmé':'Are you sure you want to remove this banned passenger? This action is irreversible.',
-    
+    'passengers.next':'Next page',
+    'passengers.previous':'Previous page',
+    "passengers.requestname": "Name is required",
+    "passengers.requestprenom": "First name is required",
+    "passengers.rquestpassport": "Passport number is required",
+    "passengers.requestnationality": "Nationality is required",
+    "passengers.requestdatebeth": "Date of birth is required",
+    "passengers.requestbanraison": "Ban reason is required",
+    "passengers.requestdateban": "Ban date is required",
+    "passengers.requestendban": "End date is required for a temporary ban",
+    "passengers.requestemailformat": "Invalid email format",
+    'passengers.titleaddpassenger':'Add banned passenger',
+    'passengers.titlemodifierpassenger':'Edit a banned passenger',
+    'passengers.titlepassengerdetails':'Passenger Details',
+    'passengers.passnumder':'Passport number',
+    'passengers.datebith':'Date of birth',
+    'passengers.infoban': 'Ban information',
+    'passengers.banraison': 'Reason for ban',
+    'passengers.datefinban':'Ban end date',
+    'passengers.additionalenote':'Additional Notes',
+
     // Users
     'users.title': 'User Management',
     'users.subtitle': 'System user accounts administration',
@@ -321,7 +364,8 @@ const translations = {
     'common.download': 'Download',
     'common.durée':'duration',
     'common.modifiéle':'Modified on',
-    'common.raison':'Reason and notes'
+    'common.raison':'Reason and notes',
+    'common.prenom':'Last name',
   }
 };
 

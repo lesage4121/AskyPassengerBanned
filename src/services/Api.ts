@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-// URL de base de l'API backend
 const API_BASE_URL = 'https://passengersbannedcert-production.up.railway.app/api';
 
 // Interface représentant une erreur renvoyée par l'API
@@ -21,17 +20,15 @@ declare global {
 // Création d'une instance Axios configurée pour notre API
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000, // délai max avant d'abandonner la requête (10s)
+  timeout: 10000,
   headers: {
-    'Content-Type': 'application/json', // toutes les requêtes utilisent du JSON
+    'Content-Type': 'application/json',
   },
 });
 
 // ----------- Intercepteurs de requêtes (avant envoi) -----------
-// Ici, on intercepte toutes les requêtes sortantes
 api.interceptors.request.use(
   (config) => {
-    // Récupération du token JWT stocké dans le localStorage
     const token = localStorage.getItem('passbanned_token');
     if (token) {
       // Ajout du token dans l'en-tête Authorization
@@ -40,20 +37,18 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
-    // Si une erreur survient lors de la configuration de la requête
     return Promise.reject(error);
   }
 );
 
 // ----------- Intercepteurs de réponses (après réception) -----------
-// Ici, on intercepte toutes les réponses de l’API
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response ) {
       const status = error.response.status;
       // On considère que seules certaines erreurs "critiques" déclenchent la page globale
-      if (status != 400) { // ex: 500 Internal Server Error
+      if (status != 400) {
         const apiError = error.response.data as ApiError;
         window.handleGlobalError(apiError);
       }
@@ -65,17 +60,12 @@ api.interceptors.response.use(
 
 export default api;
 
-// =============================================================
-// =============== Définition des types ========================
-// =============================================================
 
-// Requête de login
 export interface LoginRequest {
   email: string;
   password: string;
 }
 
-// Réponse d'un login réussi
 export interface LoginResponse {
   status: number
   token: string;
@@ -203,13 +193,11 @@ export interface DashboardStats {
 }
 // Service d'authentification
 export const authService = {
-  // Connexion avec email + mot de passe
   login: async (credentials: LoginRequest): Promise<LoginResponse> => {
     const response = await api.post<LoginResponse>('/auth/login', credentials);
     return response.data;
   },
 
-  // Validation du token JWT (vérifie si encore valide côté backend)
   validateToken: async (token: string): Promise<boolean> => {
     try {
       await api.post('/auth/validate', null, { params: { token } });
@@ -291,7 +279,7 @@ export const fileService = {
       },
     });
 
-    return response.data.url; // Lien public renvoyé par le backend
+    return response.data.url; 
   },
 };
 

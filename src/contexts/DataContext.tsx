@@ -1,7 +1,6 @@
-// Importation des modules React nécessaires
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-// Importation des services API et types
 import { 
   passengerService, 
   userService, 
@@ -10,42 +9,40 @@ import {
   CreateUserRequest 
 } from '../services/Api';
 
-// Définition du type d'un passager banni
+
 export interface BannedPassenger {
-  id: string;                              // Identifiant unique
-  firstName: string;                       // Prénom
-  lastName: string;                        // Nom
-  email: string;                           // Email
-  phone: string;                           // Téléphone
-  passportNumber: string;                  // Numéro de passeport
-  nationality: string;                     // Nationalité
-  dateOfBirth: string;                     // Date de naissance
-  banReason: string;                       // Raison du bannissement
-  banDate: string;                         // Date du bannissement
-  banDuration: 'PERMANENT' | 'TEMPORARY';  // Durée (permanent ou temporaire)
-  banEndDate?: string;                     // Date de fin si temporaire
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'; // Gravité
-  notes: string;                           // Notes supplémentaires
-  createdBy: string;                       // Créé par quel utilisateur
-  lastModified: string;                    // Dernière modification
-  status: 'ACTIVE' | 'EXPIRED' | 'UNDER_REVIEW'; // Statut actuel
+  id: string;                              
+  firstName: string;                      
+  lastName: string;                        
+  email: string;                          
+  phone: string;                           
+  passportNumber: string;                  
+  nationality: string;                     
+  dateOfBirth: string;                     
+  banReason: string;                       
+  banDate: string;                         
+  banDuration: 'PERMANENT' | 'TEMPORARY'; 
+  banEndDate?: string;                     
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'; 
+  notes: string;                           
+  createdBy: string;                       
+  lastModified: string;                   
+  status: 'ACTIVE' | 'EXPIRED' | 'UNDER_REVIEW'; 
 }
 
-// Définition du type d'un utilisateur du système
+
 export interface SystemUser {
   id: string;
-  name: string;                          // Nom complet
-  email: string;                         // Email
-  role: 'admin' | 'user';                // Rôle (admin ou simple utilisateur)
-  status: 'active' | 'inactive';         // Statut du compte
-  createdAt: string;                     // Date de création
-  lastLogin: string;                     // Dernière connexion
-  avatarurl?: string;                      // URL d’un avatar (optionnel)
+  name: string;                          
+  email: string;                         
+  role: 'admin' | 'user';                
+  status: 'active' | 'inactive';         
+  createdAt: string;                     
+  lastLogin: string;                     
+  avatarurl?: string;                    
   
 }
-/* ---------------------------------------------------------------------
-   Définition du type du contexte global (DataContextType)
-------------------------------------------------------------------------*/
+
 interface DataContextType {
   passengers: BannedPassenger[];
   users: SystemUser[];
@@ -62,35 +59,26 @@ interface DataContextType {
   
 }
 
-// Création du contexte
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
-/* ---------------------------------------------------------------------
-   Fournisseur de données (DataProvider) - Composant principal
-------------------------------------------------------------------------*/
 export function DataProvider({ children }: { children: React.ReactNode }) {
-  // États internes
   const [passengers, setPassengers] = useState<BannedPassenger[]>([]);
   const [users, setUsers] = useState<SystemUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // useEffect pour charger les données au montage
+
   useEffect(() => {
     loadInitialData();
   }, []);
 
-  /* ---------------------------------------------------------------------
-     Fonction pour charger les données initiales
-  ---------------------------------------------------------------------*/
   const loadInitialData = async () => {    
     try {
       setError(null);
       setLoading(true);
-      // Récupère passagers + utilisateurs depuis l'API
       const [passengersResponse, usersResponse] = await Promise.all([
         passengerService.getAllPassengers(0, 100),
-        userService.getAllUsers().catch(() => []) // si erreur → tableau vide
+        userService.getAllUsers().catch(() => []) 
       ]);
       // Conversion API → format local
       setPassengers(passengersResponse.content.map(convertApiPassengerToLocal));
@@ -100,15 +88,13 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error) {
       console.log(error)
-      setError("Impossible de communiquer avec le serveur");
+      setError("Unable to communicate with the server");
     } finally {
       setLoading(false);
     }
   };
 
-  /* ---------------------------------------------------------------------
-     Fonctions de conversion (API ⇄ Local)
-  ---------------------------------------------------------------------*/
+
   const convertApiPassengerToLocal = (apiPassenger: ApiPassenger): BannedPassenger => ({
     id: apiPassenger.id.toString(),
     firstName: apiPassenger.firstName,
@@ -140,19 +126,16 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     avatarurl: apiUser.avatarUrl
   });
 
-  /* ---------------------------------------------------------------------
-     Gestion des passagers (CRUD)
-  ---------------------------------------------------------------------*/
+
   const addPassenger = async (passenger: Omit<BannedPassenger, 'id' | 'createdBy' | 'lastModified'>) => {
       try {
         setError(null);
-      // Mode online → envoi API
       const apiPassenger = await passengerService.createPassenger(passenger);
       const localPassenger = convertApiPassengerToLocal(apiPassenger);
       setPassengers(prev => [...prev, localPassenger]);
     } catch (error) {
-      console.error('Erreur ajout passager:', error);
-      setError("Impossible de communiquer avec le serveur");
+      console.log('Error adding passenger:', error);
+      setError("Unable to communicate with the server");
       throw error;
     }
   };
@@ -260,16 +243,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   };
   
 
-  /* ---------------------------------------------------------------------
-     Recherche de passagers
-  ---------------------------------------------------------------------*/
 const searchPassengers = (query: string, filters?: any): BannedPassenger[] => {
   let results = passengers;
-
-  // Recherche textuelle
   if (query.trim()) {
-    const searchTerm = query.toLowerCase();
-    results = results.filter(passenger => 
+      const searchTerm = query.toLowerCase();
+      results = results.filter(passenger => 
       passenger.firstName.toLowerCase().includes(searchTerm) ||
       passenger.lastName.toLowerCase().includes(searchTerm) ||
       passenger.email.toLowerCase().includes(searchTerm) ||
@@ -277,7 +255,6 @@ const searchPassengers = (query: string, filters?: any): BannedPassenger[] => {
       passenger.nationality.toLowerCase().includes(searchTerm)
     );
   }
-
   // Application des filtres
   if (filters) {
     if (filters.severity) 
@@ -317,9 +294,6 @@ const searchPassengers = (query: string, filters?: any): BannedPassenger[] => {
   );
 }
 
-/* ---------------------------------------------------------------------
-   Hook personnalisé pour consommer le contexte
-------------------------------------------------------------------------*/
 export function useData() {
   const context = useContext(DataContext);
   if (context === undefined) {

@@ -13,17 +13,14 @@ import { LanguageProvider } from './contexts/LanguageContext';
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { DataProvider } from "./contexts/DataContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import { useNotifications } from "./hooks/useNotifications";
 import { ApiError } from "./services/Api";
 
-// -------- Composant principal --------
+
 function AppContent() {
-  const { user } = useAuth();
-  useNotifications();
+  const { user, loading } = useAuth();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // **Nouveau state pour gérer l'erreur globale**
   const [globalError, setGlobalError] = useState<ApiError | null>(null);
 
   // Exemple : intercepter les erreurs API et mettre à jour globalError
@@ -36,12 +33,14 @@ function AppContent() {
     return <ErrorPage error={globalError} />;
   }
 
-  // Si aucun utilisateur n'est connecté → afficher Login
+  if (loading) {
+    return <div className="flex justify-center items-center h-screen dark: text-white">Loading...</div>;
+  }
+
   if (!user) {
     return <Login />;
   }
 
-  // Sinon, afficher l'application normale
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />

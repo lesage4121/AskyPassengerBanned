@@ -1,13 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authService,LoginRequest } from '../services/Api';
 
-/* ----------- Définition du type User ----------- */
 interface User {
   id: string;
   name: string;
   email: string;
   role: 'admin' | 'user';
-  status: 'active' | 'inactive';  // Un compte peut être actif ou inactif
+  status: 'active' | 'inactive';
   avatar?: string;
   createdAt: string;
   lastLogin: string;
@@ -15,35 +14,51 @@ interface User {
 
 /* ----------- Définition du type du contexte ----------- */
 interface AuthContextType {
-  user: User | null;  // utilisateur connecté
+  user: User | null;
   login: (email: string, password: string) => Promise<boolean>; 
   logout: () => void;
   isAdmin: boolean;
+   loading: boolean; 
 }
 
-/* ----------- Création du contexte ----------- */
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-/* ----------- Fournisseur du contexte ----------- */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // Restaure une session sauvegardée (si l’utilisateur était déjà connecté avant)
   useEffect(() => {
-    const savedUser = localStorage.getItem('passbanned_user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
+    const checkSession = async () => {
+      const savedUser = localStorage.getItem('passbanned_user');
+      const token = localStorage.getItem('passbanned_token');   
+
+      if (!token || !savedUser) {
+      console.log('Aucun token trouvé — déconnexion automatique.');
+      logout();
+      setLoading(false);
+      return;
     }
+
+      if (savedUser && token) {
+        const isValid = await authService.validateToken(token);
+        if (isValid) {
+          setUser(JSON.parse(savedUser));
+        } else {
+          console.log('Token expiré ou invalide — déconnexion automatique.');
+          logout();
+        }
+        setLoading(false);
+      }
+    };
+   checkSession();
   }, []);
 
   /* ----------- Fonction de connexion ----------- */
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      // 1️⃣ Tentative de connexion via le backend
       const credentials: LoginRequest = { email, password };
       const response = await authService.login(credentials);
-      
-      // Sauvegarde du token JWT ou autre jeton de session
       localStorage.setItem('passbanned_token', response.token);
       
       // Conversion de la réponse API vers notre modèle User local
@@ -57,35 +72,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         createdAt: response.user.createdAt,
         lastLogin: response.user.lastLogin
       };
-      // Mise à jour du state et sauvegarde dans localStorage
       setUser(user);
       localStorage.setItem('passbanned_user', JSON.stringify(user));
       return true;
     } catch (error) {
-      return false; // identifiants incorrects
+      return false; 
     }
   };
 
-  /* ----------- Fonction de déconnexion ----------- */
   const logout = () => {
     setUser(null);
     localStorage.removeItem('passbanned_user');
     localStorage.removeItem('passbanned_token');
-    localStorage.removeItem('passbanned_offline_mode');
   };
 
-  /* ----------- Raccourci pour vérifier si l’utilisateur est admin ----------- */
   const isAdmin = user?.role === 'admin';
 
-  /* ----------- Fourniture du contexte à toute l’app ----------- */
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAdmin }}>
+    <AuthContext.Provider value={{ user, login, logout, isAdmin,loading }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-/* ----------- Hook personnalisé pour utiliser le contexte ----------- */
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {

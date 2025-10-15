@@ -1,9 +1,8 @@
-import React, { useState,useRef } from 'react';
+import React, { useState,useRef, useMemo } from 'react';
 import { Search, Plus, Filter, Edit, Trash2, Eye, AlertTriangle, Calendar, Globe, Phone, FileText, ChevronDown, ChevronRight, User, Shield, Clock } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import PassengerModal from '../components/PassengerModal';
-import { useNotifications } from '../hooks/useNotifications';
 import { motion } from 'framer-motion';
 import * as XLSX from "xlsx"; 
 import {CreatePassengerRequest, passengerService} from "../services/Api";
@@ -14,7 +13,6 @@ import { useLanguage } from '../contexts/LanguageContext';
 function Passengers() {
   const {  searchPassengers, deletePassenger, addPassenger, updatePassenger, passengers} = useData();
   const { isAdmin } = useAuth();
-  const { showSuccess, showError } = useNotifications();
   const [searchQuery, setSearchQuery] = useState('');
   const {t} = useLanguage();
   const [filters, setFilters] = useState({
@@ -25,6 +23,8 @@ function Passengers() {
   });
   const [showFilters, setShowFilters] = useState(false);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const [currentPage, setCurrentPage] = useState<number>(1);;
+  const [itemsPerPage, setItemsPerPage] = useState<number>(10);;
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     mode: 'create' | 'edit' | 'view';
@@ -37,6 +37,8 @@ function Passengers() {
   
   const [exportFormat, setexportFormat]= useState<"csv"|"excel">("csv");
   const filteredPassengers = searchPassengers(searchQuery, filters);
+  const totalPages = Math.ceil(filteredPassengers.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
   const toggleRowExpansion = (passengerId: string) => {
     const newExpandedRows = new Set(expandedRows);
     if (newExpandedRows.has(passengerId)) {
@@ -46,6 +48,22 @@ function Passengers() {
     }
     setExpandedRows(newExpandedRows);
   };
+
+
+  const handlePageChange = (newPage:number) => {
+  if (newPage < 1 || newPage > totalPages) return;
+  setCurrentPage(newPage);
+};
+
+const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  setItemsPerPage(parseInt(e.target.value));
+  setCurrentPage(1); 
+};
+
+const paginatedPassengers = useMemo(() => {
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  return filteredPassengers.slice(startIndex, startIndex + itemsPerPage);
+}, [filteredPassengers, currentPage, itemsPerPage]);
 
   const severityColors = {
     LOW: 'bg-green-100 text-green-800 border-green-200',
@@ -66,7 +84,6 @@ function Passengers() {
 const confirmDelete = () => {
   if (deleteModal.passengerId) {
     deletePassenger(deleteModal.passengerId);
-    showSuccess('Passager supprimé', 'Le passager a été supprimé avec succès');
     setDeleteModal({ isOpen: false });
   }
 };
@@ -85,7 +102,6 @@ const cancelDelete = () => {
       }
     } catch (error) {
       alert('An error occurred while saving'+error);
-      showError('Error', 'An error occurred while saving');
     }
   };
 
@@ -120,7 +136,7 @@ const cancelDelete = () => {
     const worksheet = XLSX.utils.json_to_sheet(filteredPassengers);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Passengers");
-    XLSX.writeFile(workbook, "passagers-bannis.xlsx");
+    XLSX.writeFile(workbook, "banned passengers.xlsx");
   };
 
   // Gestion export selon format choisi
@@ -134,13 +150,9 @@ const cancelDelete = () => {
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Fonction déclenchée quand on clique sur "Importer"
   const handleClick = () => {
     fileInputRef.current?.click();
   };
-
- 
-   
   const handleFileUpload =(event:React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return alert("Please select a CSV or Excel file.");
@@ -148,7 +160,6 @@ const cancelDelete = () => {
     const fileExtension = file.name.split(".").pop()?.toLowerCase();
 
     if (fileExtension === "csv") {
-      // Lire un fichier CSV
       Papa.parse(file, {
         header: true,
         skipEmptyLines: true,
@@ -158,7 +169,6 @@ const cancelDelete = () => {
         },
       });
     } else if (fileExtension === "xlsx" || fileExtension === "xls") {
-      // Lire un fichier Excel
       const reader = new FileReader();
       reader.onload = (e) => {
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
@@ -174,8 +184,6 @@ const cancelDelete = () => {
     }
   };
 
-  // Envoyer au backend
-  // Sauvegarder passagers un par un
   const saveToDatabase = async (passengers: CreatePassengerRequest[]) => {
     try {
       for (const passenger of passengers) {
@@ -320,9 +328,9 @@ const cancelDelete = () => {
                   onChange={(e) => setFilters({...filters, banDuration: e.target.value})}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-asky-orange-500"
                 >
-                  <option value="">Toutes</option>
+                  <option value="">{t('passengers.all')}</option>
                   <option value="TEMPORARY">{t('passengers.temporary')}</option>
-                  <option value="PERMANENT">{('passengers.permanent')}</option>
+                  <option value="PERMANENT">{t('passengers.permanent')}</option>
                 </select>
               </div>
               <div>
@@ -342,18 +350,70 @@ const cancelDelete = () => {
           </motion.div>
         )}
       </motion.div>
+      
+          <div className="p-6 border-b border-gray-200">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+            {filteredPassengers.length} {t('passenger.passenger')}{filteredPassengers.length > 1 ? 's' : ''} {t('passenger.pfound')}{filteredPassengers.length > 1 ? 's' : ''}
+          </h3>
+        </div>
+<motion.div
+  key={currentPage}
+  initial={{ opacity: 0, y: -10 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.3 }}
+  className="sticky top-0 z-20 flex flex-col sm:flex-row justify-between items-center px-6 py-3
+             bg-white/90 dark:bg-gray-800/90 backdrop-blur-md 
+             border-b border-gray-200 dark:border-gray-700 shadow-sm"
+>
+  <div className="flex items-center space-x-2">
+    <button
+      onClick={() => handlePageChange(currentPage - 1)}
+      disabled={currentPage === 1}
+      className="px-3 py-1 rounded-md bg-asky-brown-600 hover:bg-asky-brown-700 
+                 text-white disabled:opacity-50 disabled:cursor-not-allowed transition"
+    >
+      {t("passengers.previous")}
+    </button>
 
+    <span className="text-sm text-gray-700 dark:text-gray-300">
+      Page {currentPage} / {totalPages}
+    </span>
+
+    <button
+      onClick={() => handlePageChange(currentPage + 1)}
+      disabled={currentPage === totalPages}
+      className="px-3 py-1 rounded-md bg-asky-orange-600 hover:bg-asky-orange-700 
+                 text-white disabled:opacity-50 disabled:cursor-not-allowed transition"
+    >
+      {t("passengers.next")}
+    </button>
+  </div>
+
+  {/* --- Sélecteur du nombre d’éléments --- */}
+  <div className="flex items-center mt-2 sm:mt-0 space-x-2">
+    <select
+      id="itemsPerPage"
+      value={itemsPerPage}
+      onChange={handleItemsPerPageChange}
+      className="text-sm border border-gray-300 dark:border-gray-700 rounded-md px-2 py-1 
+                 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 focus:ring-asky-orange-600"
+    >
+      <option value={5}>5</option>
+      <option value={10}>10</option>
+      <option value={20}>20</option>
+      <option value={50}>50</option>
+      <option value={100}>100</option>
+    </select>
+
+   
+  </div>
+</motion.div>
       {/* Liste des passagers */}
       <motion.div
        initial ={{opacity:0, y:30}}
        animate = {{opacity: 1, y:0}}
        transition={{duration:1}}
        className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div className="p-6 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-            {filteredPassengers.length} {t('passenger.passenger')}{filteredPassengers.length > 1 ? 's' : ''} {t('passenger.pfound')}{filteredPassengers.length > 1 ? 's' : ''}
-          </h3>
-        </div>
         
         {filteredPassengers.length > 0 ? (
           <div className="overflow-x-auto">
@@ -384,7 +444,7 @@ const cancelDelete = () => {
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {filteredPassengers.map((passenger, index) => (
+                {paginatedPassengers.map((passenger, index) => (
                   <React.Fragment key={passenger.id}>
                     {/* Ligne principale */}
                     <motion.tr 
