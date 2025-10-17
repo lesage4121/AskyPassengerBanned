@@ -10,6 +10,7 @@ import {
 } from '../services/Api';
 
 
+
 export interface BannedPassenger {
   id: string;                              
   firstName: string;                      
@@ -55,6 +56,7 @@ interface DataContextType {
   searchPassengers: (query: string, filters?: any) => BannedPassenger[];
   loading : boolean;
   error : string | null;
+  setToken:React.Dispatch<React.SetStateAction<string | null>>;
   
   
 }
@@ -66,16 +68,19 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [users, setUsers] = useState<SystemUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+   const [token, setToken] = useState<string | null>(localStorage.getItem("passbanned_token"))
 
 
   useEffect(() => {
+  if(!token) return;
     loadInitialData();
-  }, []);
+  }, [token]);
 
   const loadInitialData = async () => {    
     try {
       setError(null);
       setLoading(true);
+
       const [passengersResponse, usersResponse] = await Promise.all([
         passengerService.getAllPassengers(0, 100),
         userService.getAllUsers().catch(() => []) 
@@ -219,6 +224,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         apiUpdates.password = updates.password
       }
       const updatedUser = await userService.updateUser(parseInt(id), apiUpdates);
+      console.log(JSON.stringify(updatedUser))
       const localUser = convertApiUserToLocal(updatedUser);
       
       setUsers(prev => prev.map(user => 
@@ -287,7 +293,8 @@ const searchPassengers = (query: string, filters?: any): BannedPassenger[] => {
       deleteUser,
       searchPassengers,
       loading,
-      error
+      error,
+      setToken,
     }}>
       {children}
     </DataContext.Provider>

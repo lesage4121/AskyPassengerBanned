@@ -3,22 +3,13 @@ import { useData } from '../contexts/DataContext';
 import StatsCard from '../components/StatsCard';
 import {motion} from "framer-motion";
 import { useLanguage } from '../contexts/LanguageContext';
-import { useEffect, useState } from 'react';
+
 
 function Dashboard() {
 const { passengers, loading,error} = useData();
 const {t} = useLanguage();
 
-const [initialLoading, setInitialLoading] = useState(true);
-
- useEffect(() => {
-    const timer = setTimeout(() => {
-      setInitialLoading(false);
-    }, 900);
-    return () => clearTimeout(timer);
-  }, []);
-
-   if (loading || initialLoading) {
+   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="w-16 h-16 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>

@@ -234,6 +234,7 @@ export const userService = {
   updateUser: async (id: number, user: Partial<ApiUser> & {password?:string}): Promise<ApiUser> => {
     const response = await api.put<ApiUser>(`/users/${id}`, user);
     return response.data;
+
   },
 
   deleteUser: async (id: number): Promise<void> => {

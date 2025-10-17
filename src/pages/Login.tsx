@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import { Lock, Mail, Eye, EyeOff } from 'lucide-react'; 
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { useData } from '../contexts/DataContext';
 
 function Login() {
+   const navigate = useNavigate();
   const [email, setEmail] = useState('');             
   const [password, setPassword] = useState('');       
   const [showPassword, setShowPassword] = useState(false); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(''); 
+  const { setToken } = useData();
 
   const { login } = useAuth();
 
@@ -24,10 +28,13 @@ function Login() {
     } catch (error) {
       setError('An error occurred while connecting');
     } finally {
+      const token = localStorage.getItem("passbanned_token");
+      setToken(token);
       setLoading(false);
+      navigate("/")
     }
   };
-
+ 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
       <div className="absolute inset-0 z-0">

@@ -58,6 +58,7 @@ function Users() {
         alert('The new user has been created successfully');
       } else if (modalState.mode === 'edit' && modalState.user) {
         updateUser(modalState.user.id, userData);
+        alert("Update completed successfully")
       }
     } catch (error:any) {
       alert('An error occurred while saving'+error.toISOString);

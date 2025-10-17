@@ -112,6 +112,7 @@ const translations = {
     'passengers.banraison': 'Raison du ban',
     'passengers.datefinban':'Date de fin du ban',
     'passengers.additionalenote':'Notes additionnelles',
+    
 
     // Users
     'users.title': 'Gestion des utilisateurs',
@@ -130,7 +131,7 @@ const translations = {
     'users.accessDenied': 'Accès refusé',
     'users.accessDeniedDesc': 'Vous devez être administrateur pour accéder à cette page.',
     'users.nouser':'Aucun utilisateur trouvé',
-
+    'users.inactif':"Inactif",
   
     
     // Profile
@@ -154,6 +155,7 @@ const translations = {
     'profile.activeSessions': 'Sessions actives',
     'profile.picture':'Photo de profil',
     'profil.mask':'Masquer',
+    'profil.confirmpass':'Confirmer le mot de passe',
     
     // Common
     'common.save': 'Sauvegarder',
@@ -309,6 +311,7 @@ const translations = {
     'users.accessDenied': 'Access denied',
     'users.accessDeniedDesc': 'You must be an administrator to access this page.',
     'users.nouser':'No user found',
+    'users.inactif':"Inactive",
     
     // Profile
     'profile.title': 'My Profile',
@@ -331,6 +334,7 @@ const translations = {
     'profile.nele':'Born on',
     'profile.picture':'Profil picture',
     'profil.mask':'Hide',
+    'profil.confirmpass':'Confirm password',
     
     // Common
     'common.save': 'Save',

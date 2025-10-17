@@ -183,23 +183,23 @@ function UserModal({ isOpen, onClose, onSave, user, mode }: UserModalProps) {
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Nom complet</h4>
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">{t("profile.fullName")}</h4>
                     <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">{formData.name}</p>
                   </div>
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Adresse email</h4>
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">{t('profile.email')}</h4>
                     <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">{formData.email}</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Rôle</h4>
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">{t('users.role')}</h4>
                     <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">
                       {formData.role === 'admin' ? 'Administrateur' : 'Utilisateur'}
                     </p>
                   </div>
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Statut</h4>
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">{t('common.status')}</h4>
                     <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">
                       {formData.status === 'active' ? 'Actif' : 'Inactif'}
                     </p>
@@ -212,7 +212,7 @@ function UserModal({ isOpen, onClose, onSave, user, mode }: UserModalProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Nom complet *
+                      {t("profile.fullName")}*
                     </label>
                     <input
                       type="text"
@@ -227,7 +227,7 @@ function UserModal({ isOpen, onClose, onSave, user, mode }: UserModalProps) {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Adresse email *
+                      {t('profile.email')} *
                     </label>
                     <input
                       type="email"
@@ -244,29 +244,29 @@ function UserModal({ isOpen, onClose, onSave, user, mode }: UserModalProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Rôle *
+                      {t('users.role')} *
                     </label>
                     <select
                       value={formData.role}
                       onChange={(e) => handleInputChange('role', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-asky-orange-500"
                     >
-                      <option value="user">Utilisateur</option>
-                      <option value="admin">Administrateur</option>
+                      <option value="user">{t('nav.users')}</option>
+                      <option value="admin">{t('users.admin')}</option>
                     </select>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Statut *
+                      {t('common.status')} *
                     </label>
                     <select
                       value={formData.status}
                       onChange={(e) => handleInputChange('status', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-asky-orange-500"
                     >
-                      <option value="active">Actif</option>
-                      <option value="inactive">Inactif</option>
+                      <option value="active">{t('passengers.active')}</option>
+                      <option value="inactive">{t('users.inactif')}</option>
                     </select>
                   </div>
                 </div>
@@ -281,7 +281,7 @@ function UserModal({ isOpen, onClose, onSave, user, mode }: UserModalProps) {
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {mode === 'create' ? 'Mot de passe *' : 'Nouveau mot de passe'}
+                    {mode === 'create' ? `${t('login.password')} *`  : t('profile.newPassword')}
                   </label>
                   <div className="relative">
                     <input
@@ -309,7 +309,7 @@ function UserModal({ isOpen, onClose, onSave, user, mode }: UserModalProps) {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {mode === 'create' ? 'Confirmer le mot de passe *' : 'Confirmer le nouveau mot de passe'}
+                    {mode === 'create' ? `${t('profil.confirmpass')} *` : t('profile.confirmPassword')}
                   </label>
                   <div className="relative">
                     <input
@@ -340,14 +340,14 @@ function UserModal({ isOpen, onClose, onSave, user, mode }: UserModalProps) {
             {/* Informations supplémentaires en mode vue */}
             {isReadOnly && user && (
               <div className="space-y-4 border-t pt-4">
-                <h3 className="text-lg font-medium text-gray-900">Informations du compte</h3>
+                <h3 className="text-lg font-medium text-gray-900">{t('profile.accountInfo')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="font-medium text-gray-700">Créé le:</span>
+                    <span className="font-medium text-gray-700">{t('users.created')}:</span>
                     <p className="text-gray-900">{new Date(user.createdAt).toLocaleDateString('fr-FR')}</p>
                   </div>
                   <div>
-                    <span className="font-medium text-gray-700">Dernière connexion:</span>
+                    <span className="font-medium text-gray-700">{t('users.lastLogin')}:</span>
                     <p className="text-gray-900">{new Date(user.lastLogin).toLocaleDateString('fr-FR')}</p>
                   </div>
                 </div>
@@ -362,14 +362,14 @@ function UserModal({ isOpen, onClose, onSave, user, mode }: UserModalProps) {
                 onClick={onClose}
                 className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                Annuler
+                {t('profile.cancel')}
               </button>
               <button
                 type="submit"
                 className="px-6 py-2 bg-asky-brown-600 text-white rounded-lg hover:bg-asky-brown-700 transition-colors flex items-center space-x-2"
               >
                 <Save className="h-4 w-4" />
-                <span>{mode === 'create' ? 'Créer' : 'Sauvegarder'}</span>
+                <span>{mode === 'create' ? t('common.create') : t('profile.save')}</span>
               </button>
             </div>
           )}

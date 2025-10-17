@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { X, Save, AlertTriangle, } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Select from 'react-select';
 import countryList from 'react-select-country-list';
 import { BannedPassenger } from '../contexts/DataContext';
@@ -125,9 +125,7 @@ function PassengerModal({ isOpen, onClose, onSave, passenger, mode }: PassengerM
       : t('passengers.titlepassengerdetails');
 
   return (
-    <AnimatePresence>
     <motion.div
-    key="passenger-modal"
       initial={{ opacity: 0, y: -30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
@@ -379,7 +377,6 @@ function PassengerModal({ isOpen, onClose, onSave, passenger, mode }: PassengerM
         </form>
       </div>
     </motion.div>
-    </AnimatePresence>
   );
 }
 
