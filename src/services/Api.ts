@@ -232,6 +232,7 @@ export const userService = {
   },
 
   updateUser: async (id: number, user: Partial<ApiUser> & {password?:string}): Promise<ApiUser> => {
+    console.log(JSON.stringify(user))
     const response = await api.put<ApiUser>(`/users/${id}`, user);
     return response.data;
 

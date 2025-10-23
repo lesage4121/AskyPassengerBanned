@@ -1,7 +1,6 @@
 import  { useState } from 'react';
 import { Shield, Calendar, Edit, Save, X, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { useData } from '../contexts/DataContext';
 import AvatarUpload from '../components/avatarUpload';
 import { useLanguage } from '../contexts/LanguageContext';
 import { userService } from '../services/Api';
@@ -9,7 +8,6 @@ import { userService } from '../services/Api';
 
 function Profile() {
   const { user } = useAuth();
-  const { updateUser } = useData();
   const [isEditing, setIsEditing] = useState(false);
   const {t} = useLanguage();
   const [showPasswordChange, setShowPasswordChange] = useState(false);

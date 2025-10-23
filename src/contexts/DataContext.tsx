@@ -224,9 +224,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         apiUpdates.password = updates.password
       }
       const updatedUser = await userService.updateUser(parseInt(id), apiUpdates);
-      console.log(JSON.stringify(updatedUser))
       const localUser = convertApiUserToLocal(updatedUser);
-      
       setUsers(prev => prev.map(user => 
         user.id === id ? localUser : user
       ));
