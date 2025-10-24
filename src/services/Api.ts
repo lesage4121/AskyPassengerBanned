@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'https://passengersbannedcert-production.up.railway.app/api';
+const API_BASE_URL = 'https://passengers-banned-cert.onrender.com/api';
 
 // Interface représentant une erreur renvoyée par l'API
 export interface ApiError {
