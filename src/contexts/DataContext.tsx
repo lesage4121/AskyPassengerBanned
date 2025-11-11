@@ -40,7 +40,8 @@ export interface SystemUser {
   status: 'active' | 'inactive';         
   createdAt: string;                     
   lastLogin: string;                     
-  avatarurl?: string;                    
+  avatarurl?: string;  
+  mfaEnabled:boolean                  
   
 }
 
@@ -128,7 +129,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     status: apiUser.status.toLowerCase() as 'active' | 'inactive',
     createdAt: apiUser.createdAt,
     lastLogin: apiUser.lastLogin,
-    avatarurl: apiUser.avatarUrl
+    avatarurl: apiUser.avatarUrl,
+    mfaEnabled: apiUser.mfaEnabled,
   });
 
 
@@ -197,9 +199,9 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         password: user.password,
         role: user.role.toUpperCase() as 'USER' | 'ADMIN',
         status: user.status.toUpperCase() as 'ACTIVE' | 'INACTIVE',
-        avatarUrl: user.avatarurl
+        avatarUrl: user.avatarurl,
+        mfaEnabled:user.mfaEnabled
       };
-      
       const createdUser = await userService.createUser(createUserRequest);
       const localUser = convertApiUserToLocal(createdUser);
       setUsers(prev => [...prev, localUser]);
@@ -218,6 +220,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         role: updates.role?.toUpperCase() as 'USER' | 'ADMIN' ,
         status: updates.status?.toUpperCase() as 'ACTIVE' | 'INACTIVE',
         avatarurl: updates.avatarurl,
+        mfaEnabled: updates.mfaEnabled,
       };
 
       if(updates.password) {

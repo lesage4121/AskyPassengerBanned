@@ -8,7 +8,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 
 function Users() {
   const { users, deleteUser, addUser, updateUser } = useData();
-  const { isAdmin } = useAuth();
+  const { isAdmin,resetMfa } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const {t}= useLanguage();
   const [modalState, setModalState] = useState<{
@@ -72,6 +72,22 @@ function Users() {
   const closeModal = () => {
     setModalState({ isOpen: false, mode: 'create', user: undefined });
   };
+const handleResetMFA = async(userId: string) => {
+  if (window.confirm('Do you really want to reset this user MFA?')) {
+    try {
+        const ok = await resetMfa(userId);
+        if (ok){
+           alert(' ✅ MFA has been successfully reset.');
+        } else {
+          alert('❌ Échec de la réinitialisation du MFA.')
+        }
+        
+    } catch (error) {
+      console.error('Erreur lors de la réinitialisation MFA:', error);
+      alert("Une erreur s'est produite lors de la réinitialisation MFA.");
+    }
+  }
+};
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -214,31 +230,50 @@ function Users() {
                 </div>
 
                 <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <span className={`px-3 py-1 text-xs font-medium rounded-full border ${roleColors[user.role]}`}>
-                      {user.role === 'admin' ? t('users.admin'): t('users.user')}
-                    </span>
-                    <span className={`px-3 py-1 text-xs font-medium rounded-full ${statusColors[user.status]}`}>
-                      {user.status === 'active' ? t('passengers.active') : 'Inactif'}
-                    </span>
-                  </div>
+  <div className="flex items-center space-x-2">
+    <span className={`px-3 py-1 text-xs font-medium rounded-full border ${roleColors[user.role]}`}>
+      {user.role === 'admin' ? t('users.admin'): t('users.user')}
+    </span>
+    <span className={`px-3 py-1 text-xs font-medium rounded-full ${statusColors[user.status]}`}>
+      {user.status === 'active' ? t('passengers.active') : 'Inactif'}
+    </span>
 
-                  <div className="flex items-center space-x-2">
-                    <button 
-                      onClick={() => openModal('edit', user)}
-                      className="p-2 text-gray-400 hover:text-asky-brown-600 hover:bg-asky-brown-50 rounded-lg transition-colors"
-                    >
-                      <Edit className="h-5 w-5" />
-                    </button>
-                    <button 
-                      onClick={() => handleDelete(user.id)}
-                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      disabled={user.id === '1'} // Empêcher la suppression de l'admin principal
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </button>
-                  </div>
-                </div>
+    {/* 🔒 Nouveau : Statut MFA */}
+    <span
+      className={`px-3 py-1 text-xs font-medium rounded-full ${
+        user.mfaEnabled ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700'
+      }`}
+    >
+      {user.mfaEnabled ? 'MFA enabled' : 'MFA disabled'}
+    </span>
+  </div>
+
+  <div className="flex items-center space-x-2">
+    <button 
+      onClick={() => openModal('edit', user)}
+      className="p-2 text-gray-400 hover:text-asky-brown-600 hover:bg-asky-brown-50 rounded-lg transition-colors"
+    >
+      <Edit className="h-5 w-5" />
+    </button>
+    <button 
+      onClick={() => handleDelete(user.id)}
+      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+      disabled={user.id === '1'}
+    >
+      <Trash2 className="h-5 w-5" />
+    </button>
+    {user.mfaEnabled && (
+      <button
+        onClick={() => handleResetMFA(user.id)}
+        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+        title='Reset MFA'
+      >
+        🔄 Reset MFA
+      </button>
+    )}
+  </div>
+</div>
+
               </div>
             </motion.div>
           ))}

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'https://passengers-banned-cert.onrender.com/api';
+const API_BASE_URL = 'http://localhost:8080/api';
 
 // Interface représentant une erreur renvoyée par l'API
 export interface ApiError {
@@ -80,6 +80,7 @@ export interface LoginResponse {
     lastLogin: string;
     createdAt: string;
     updatedAt: string;
+    mfaEnabled:boolean
   };
 }
 
@@ -94,6 +95,7 @@ export interface ApiUser {
   lastLogin: string;
   createdAt: string;
   updatedAt: string;
+  mfaEnabled: boolean;
 }
 
 // Requête pour créer un utilisateur
@@ -104,6 +106,7 @@ export interface CreateUserRequest {
   role: 'USER' | 'ADMIN';
   status: 'ACTIVE' | 'INACTIVE';
   avatarUrl?: string;
+  mfaEnabled: boolean;
 }
 
 // Passager renvoyé par l’API
@@ -193,9 +196,43 @@ export interface DashboardStats {
 }
 // Service d'authentification
 export const authService = {
-  login: async (credentials: LoginRequest): Promise<LoginResponse> => {
-    const response = await api.post<LoginResponse>('/auth/login', credentials);
+  login: async (credentials: LoginRequest): Promise<any> => {
+    const response = await api.post('/auth/login', credentials);
+    const data = response.data;
+
+    // Cas 1 : MFA non requis
+    if (!data.mfaRequired) {
+      return {
+        success: true,
+        token: data.token,
+        user: data.user,
+        mfaRequired: false,
+      };
+    }
+
+    // Cas 2 : MFA requis mais pas encore configuré
+    if (data.mfaSetup && !data.user.mfaConfigured) {
+      return {
+        success: false,
+        mfaSetup: true,
+        otpAuthUrl: data.otpAuthUrl,
+        user: data.user,
+      };
+    }
+
+    // Cas 3 : MFA requis et déjà configuré
+    return {
+      success: false,
+      mfaRequired: true,
+      user: data.user,
+    };
+  },
+
+  verifyMfa: async (email: string, code: string): Promise<any> => {
+    const response = await api.post('/auth/mfa/verify', { email, code });
+    console.log(JSON.stringify(response))
     return response.data;
+
   },
 
   validateToken: async (token: string): Promise<boolean> => {
@@ -207,6 +244,7 @@ export const authService = {
     }
   },
 };
+
 
 // Service de gestion des utilisateurs
 export const userService = {
@@ -232,7 +270,6 @@ export const userService = {
   },
 
   updateUser: async (id: number, user: Partial<ApiUser> & {password?:string}): Promise<ApiUser> => {
-    console.log(JSON.stringify(user))
     const response = await api.put<ApiUser>(`/users/${id}`, user);
     return response.data;
 
@@ -268,7 +305,14 @@ export const userService = {
     });
     return response.data;
   },
+  
+  resetMFA: async (id: number): Promise<string> => {
+  const response = await api.post(`/users/${id}/reset-mfa`)
+  return response.data.status;
+},
 }
+
+
 // Service pour upload des fichiers
 export const fileService = {
   uploadUserAvatar: async (file: File): Promise<string> => {

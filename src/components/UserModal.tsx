@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, Eye, EyeOff } from 'lucide-react';
+import { X, Save, Eye, EyeOff} from 'lucide-react';
 import { SystemUser } from '../contexts/DataContext';
 import { userService } from '../services/Api';
 import AvatarUpload from './avatarUpload';
@@ -23,7 +23,8 @@ function UserModal({ isOpen, onClose, onSave, user, mode }: UserModalProps) {
     status: 'active' as 'active' | 'inactive',
     password: '',
     confirmPassword: '',
-    avatarurl: ''
+    avatarurl: '',
+    mfaEnabled: false,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -40,7 +41,8 @@ function UserModal({ isOpen, onClose, onSave, user, mode }: UserModalProps) {
         status: user.status,
         password: '',
         confirmPassword: '',
-        avatarurl: user.avatarurl || ""
+        avatarurl: user.avatarurl || "",
+        mfaEnabled:user.mfaEnabled || false,
       });
     } else if (mode === 'create') {
       setFormData({
@@ -50,7 +52,8 @@ function UserModal({ isOpen, onClose, onSave, user, mode }: UserModalProps) {
         status: 'active',
         password: '',
         confirmPassword: '',
-        avatarurl: "/avatar.jpg"
+        avatarurl: "/avatar.jpg",
+        mfaEnabled: false,
       });
     }
   }, [user, mode, isOpen]);
@@ -97,16 +100,15 @@ function UserModal({ isOpen, onClose, onSave, user, mode }: UserModalProps) {
         role: formData.role,
         status: formData.status,
         avatarurl: formData.avatarurl,
-        password:formData.password
-       
-        
+        password:formData.password,
+        mfaEnabled: formData.mfaEnabled
       };
       onSave(userData);
       onClose();
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
@@ -275,6 +277,21 @@ function UserModal({ isOpen, onClose, onSave, user, mode }: UserModalProps) {
             {/* Mot de passe */}
             {!isReadOnly && (
               <div className="space-y-4">
+                <h3 className="text-lg font-medium text-gray-900">Authentification MFA</h3>
+                {/* Toggle MFA */}
+                <div className="flex items-center justify-between">
+                  <label className="text-sm text-gray-700">Enable/Disable MFA</label>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.mfaEnabled}
+                      onChange={(e) => handleInputChange('mfaEnabled', e.target.checked)
+                      }
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-green-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
+                  </label>
+                </div>
                 <h3 className="text-lg font-medium text-gray-900 border-t pt-4">
                   {mode === 'create' ? 'Mot de passe' : 'Changer le mot de passe (optionnel)'}
                 </h3>

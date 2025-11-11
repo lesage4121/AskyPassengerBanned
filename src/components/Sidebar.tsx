@@ -39,7 +39,7 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
         <div className="flex items-center justify-between h-16 px-0  border-gray-200 dark:border-gray-700">
           <div className="flex items-center">
             <img 
-              src="/kp.png" 
+              src="/logo_Asky.png" 
               alt="ASKY Airlines" 
               className="h-14 w-auto"
             />

@@ -5,36 +5,65 @@ import { useNavigate } from 'react-router-dom';
 import { useData } from '../contexts/DataContext';
 
 function Login() {
-   const navigate = useNavigate();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');             
-  const [password, setPassword] = useState('');       
+  const [password, setPassword] = useState('');
+  const [code, setcode] = useState('');       
   const [showPassword, setShowPassword] = useState(false); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(''); 
+  const [otpAuthUrl, setOtpAuthUrl] = useState('');
+  const [step, setStep] = useState<'login' | 'setup' | 'mfa'>('login');
   const { setToken } = useData();
-
-  const { login } = useAuth();
+  const { login, verifyMfa } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    const response = await login(email, password);
 
-    try {
-      const success = await login(email, password);
-      if (!success) {
-        setError('Incorrect email or password');
-      }
-    } catch (error) {
-      setError('An error occurred while connecting');
-    } finally {
-      const token = localStorage.getItem("passbanned_token");
+    if(response.success){
+      const token = localStorage.getItem('passbanned_token');
+      
       setToken(token);
-      setLoading(false);
-      navigate("/")
+      navigate('/');
+      return;
     }
+    if (response.mfaSetup) {
+      setOtpAuthUrl(response.otpAuthUrl);
+      setStep('setup');
+    } else if (response.mfaRequired) {
+      setStep('mfa');
+    } else {
+      setError('Incorrect email or password');
+    }
+
+    setLoading(false);
+  };
+
+  const handleVerifyMfa = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    console.log("les valeurs email et code "+email+" et "+code)
+    const success = await verifyMfa(email, code);
+
+    if (success) {
+      const token = localStorage.getItem('passbanned_token');
+      setToken(token);
+      navigate('/');
+    } else {
+      setError('Invalid MFA code');
+    }
+
+    setLoading(false);
   };
  
+  function Quit(): void {
+    setStep('login');
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
       <div className="absolute inset-0 z-0">
@@ -53,6 +82,7 @@ function Login() {
         </div>
 
         <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-xl shadow-2xl p-8 relative z-10">
+        {step === "login" && (
           <form className="space-y-6" onSubmit={handleSubmit}>
             
             <div>
@@ -119,7 +149,91 @@ function Login() {
             >
               {loading ? 'Connecting...' : 'Log in'}
             </button>
-          </form>       
+          </form> 
+        )}
+          {step === 'setup' && (
+          <div className="text-center space-y-4">
+          <p className="text-gray-700">
+               Scan this code in <strong>Google Authenticator</strong> :
+          </p>
+
+         <img
+         src={`https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
+         otpAuthUrl
+         )}&size=200x200`}
+          alt="QR Code"
+          className="mx-auto"
+          />
+
+         <p className="text-sm text-gray-600">
+           Next, enter the first 6-digit code displayed in your application.
+         </p>
+
+    <form
+      onSubmit={handleVerifyMfa}
+      className="space-y-2"
+    >
+      <input
+        type="text"
+        value={code}
+        onChange={(e) => setcode(e.target.value)}
+        placeholder="Entrez le code à 6 chiffres"
+        maxLength={6}
+        required
+        className="w-full border rounded-md p-2 text-center tracking-widest"
+      />
+      {error && <p className="text-red-500 text-sm">{error}</p>}
+      
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-green-600 text-white py-2 rounded-md"
+      >
+        {loading ? 'Verification...' : 'Check the code'}
+      </button>
+
+       <button
+             onClick={()=> Quit()}
+              className="w-full bg-red-600 text-white py-2 rounded-md"
+            >
+              Cancel
+       </button>
+    </form>
+  </div>
+)}
+
+        {step === 'mfa' && (
+          <form onSubmit={handleVerifyMfa} className="space-y-6">
+            <label className="block text-sm font-medium mb-1">
+              Enter your code
+            </label>
+            <input
+              type="text"
+              value={code}
+              onChange={(e) => setcode(e.target.value)}
+              required
+              maxLength={6}
+              className="w-full border rounded-md p-2 text-center tracking-widest"
+            />
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+            <div className="space-y-2">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-green-600 text-white py-2 rounded-md"
+            >
+              {loading ? 'Verifying...' : 'Verify Code'}
+            </button>
+
+           <button
+             onClick={()=> Quit()}
+              className="w-full bg-red-600 text-white py-2 rounded-md"
+            >
+              Cancel
+            </button>
+            </div>
+          </form>
+        )}         
         </div>
       </div>
     </div>
